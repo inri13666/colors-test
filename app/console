@@ -1,0 +1,30 @@
+#!/usr/bin/env php
+<?php
+// application.php
+
+require __DIR__ . '/../vendor/autoload.php';
+require __DIR__ . '/colors.inc.php';
+
+use Symfony\Component\Console\Application;
+
+$application = new Application();
+$commandsPath = implode(DIRECTORY_SEPARATOR, [dirname(__DIR__), 'src', 'Command']);
+class_exists(\Symfony\Component\Console\Command\Command::class, true);
+
+$classes = get_declared_classes();
+foreach (new DirectoryIterator($commandsPath) as $fileInfo) {
+    if ($fileInfo->isDot()) {
+        continue;
+    }
+    require $fileInfo->getPathname();
+}
+
+$classes = array_diff(get_declared_classes(), $classes);
+
+foreach ($classes as $class) {
+    if (in_array(\Symfony\Component\Console\Command\Command::class, class_parents($class, true))) {
+        $application->add(new $class);
+    }
+}
+
+$application->run();

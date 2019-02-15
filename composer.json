@@ -1,0 +1,22 @@
+{
+    "name": "mesav/color",
+    "authors": [
+        {
+            "name": "Nikita Makarov",
+            "email": "mesaverde228@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-0": {
+            "Akuma\\": "src"
+        },
+        "exclude-from-classmap": [
+            "/Tests/"
+        ]
+    },
+    "require": {
+        "symfony/console": "^4.2",
+        "ext-fileinfo": "*",
+        "ext-gd": "*"
+    }
+}
