@@ -35,8 +35,9 @@ class DumpDominantColors extends Command
         }
 
         $table = new Table($output);
-        $table->setHeaders(['FileName', 'DominantColor', 'Percentage']);
+        $table->setHeaders(['FileName', 'DominantColor(HEX)', 'DominantColor(Value)', 'Percentage']);
         $cnt = 0;
+        $rows = [];
         foreach (new \DirectoryIterator($imagesFolder) as $fileInfo) {
             if ($fileInfo->isDot() || $fileInfo->isDir()) {
                 continue;
@@ -45,14 +46,28 @@ class DumpDominantColors extends Command
             if (stripos(mime_content_type($image), 'image') !== false) {
                 $data = $ex->Get_Color($image, 1);
                 $colors = array_keys($data);
-                $table->addRow([
-                    $fileInfo->getFilename(),
-                    reset($colors),
-                    reset($data),
-                ]);
+                $rows[] = [
+                    'fileName' => $fileInfo->getFilename(),
+                    'color' => reset($colors),
+                    'value' => hexdec(reset($colors)),
+                    'percentage' => reset($data),
+                ];
                 $cnt++;
             }
         }
+
+        usort($rows, function ($a, $b) {
+            if ($a['value'] == $b['value']) {
+                if ($a['percentage'] == $b['percentage']) {
+                    return 0;
+                }
+
+                return $a['percentage'] < $b['percentage'] ? 1 : -1;
+            }
+
+            return $a['value'] < $b['value'] ? 1 : -1;
+        });
+        $table->setRows($rows);
         $table->render();
 
         $output->writeln(sprintf(
